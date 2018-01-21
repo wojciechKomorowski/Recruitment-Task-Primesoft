@@ -55,6 +55,14 @@ If you installed webpack globally, you can type:
 webpack
 ```
 
+Open new tab in console to run webpack-dev-server:
+
+```
+./node_modules/.bin/webpack-dev-server --inline --hot
+```
+
+Now your project is hosted on localhost:3001.
+
 ## Built With
 
 * HTML5
