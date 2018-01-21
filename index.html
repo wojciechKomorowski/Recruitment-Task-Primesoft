@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Drag and drop shapes</title>
+    <link rel="stylesheet" href="./bootstrap-3.3.7-dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./bootstrap-3.3.7-dist/css/bootstrap-theme.min.css">
+</head>
+<body>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title shape-name">Shape</h4>
+                </div>
+                <div class="modal-body">
+                    <label for="innerText">
+                        <input type="text" name="innerText" class="inner-text">
+                    </label>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" data-dismiss="modal" class="btn btn-primary save-button">Save changes</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    
+    <div class="wrapper">
+        <div class="square" data-toggle="modal" data-target="#myModal">
+                <p class="shape-text"></p>
+                <p class="position"></p>
+        </div>
+        <div class="circle" data-toggle="modal" data-target="#myModal">
+                <p class="shape-text"></p>
+                <p class="position"></p>
+        </div>
+        <div class="star" data-toggle="modal" data-target="#myModal">
+            <p class="shape-text"></p>
+            <p class="position-star"></p>
+        </div>
+    </div>
+    
+    <script src="./bootstrap-3.3.7-dist/js/jquery-3.2.1.min.js"></script>
+    <script src="./bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+    <script src="./dist/js/out.js" type="text/javascript"></script>
+</body>
+</html>
