@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const starElement = document.querySelector('.star');
     const saveButton = document.querySelector('.save-button');
     const textInput = document.querySelector('.inner-text');
+    const shapeTextArr = document.querySelectorAll('div.wrapper div > p');
 
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     let assignNameAndText = (object) => {
@@ -62,6 +63,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wrapper.addEventListener('click', addShapeName);
     saveButton.addEventListener('click', addInnerText);
+    for (let i = 0; i < shapeTextArr.length; i++) {
+        shapeTextArr[i].addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+    }
 
     // Drag and drop mechanism.
     let target = null;
