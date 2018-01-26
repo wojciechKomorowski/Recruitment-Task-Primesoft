@@ -4,6 +4,14 @@ import { Shape } from "./shape";
 
 document.addEventListener('DOMContentLoaded', () => {
 
+    // Distinguishing dragging from click events.
+    let drag = false;
+    let changeDrag = () => {
+        let timer = setTimeout(() => {
+            drag = false;
+        }, 500);
+    }
+
     // Objects
     let squareObject = new Shape('Square');
     let circleObject = new Shape('Circle');
@@ -19,15 +27,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const textInput = document.querySelector('.inner-text');
     const shapeTextArr = document.querySelectorAll('div.wrapper div > p');
 
+    // jQuery objects to handle modal.
+    const modal = $('#myModal');
+
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     let assignNameAndText = (object) => {
-        shapeName.innerText = object.name;
-        textInput.value = object.text;
+        if (drag === false) {
+            shapeName.innerText = object.name;
+            textInput.value = object.text;
+            modal.modal('show');
+        }
     };
 
     // Target elements with specify class and do assigning from assingnNameAndText function. 
-    let addShapeName = (event) => {
-        let target = event.target;
+    let addShapeName = (e) => {
+        let target = e.target;
         if (target.className === 'square' || target.className === 'circle' || target.className === 'star') {
             if (target.className === 'square') {
                 assignNameAndText(squareObject);
@@ -47,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             element.firstElementChild.innerText = object.text;
         }
+        modal.modal('hide');
     };
 
     // Call assignModalText function for speciffic shape names. 
@@ -58,16 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
             assignModalText(circleObject, circleElement, modalText);
         } else if (shapeName.innerText === 'Star') {
             assignModalText(starObject, starElement, modalText);
-        }  
+        }
     };
 
     wrapper.addEventListener('click', addShapeName);
     saveButton.addEventListener('click', addInnerText);
     for (let i = 0; i < shapeTextArr.length; i++) {
-        shapeTextArr[i].addEventListener('click', (event) => {
-            event.stopPropagation();
+        shapeTextArr[i].addEventListener('click', (e) => {
+            e.stopPropagation();
         });
     }
+    
 
     // Drag and drop mechanism.
     let target = null;
@@ -76,19 +92,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let prev_x = null;
     let prev_y = null;
 
-    let dragElement = (event) => {
-        target = event.target;    
+    let dragElement = (e) => {
+        drag = false; // Allowing click events.
+        target = e.target;    
         // Set current X coordinate minus distance left from offsetParent node.
         prev_x = x - target.offsetLeft;
         // Set current Y coordinate minus distance top from offsetParent node.
         prev_y = y - target.offsetTop;
     };
-
-    let moveElement = (event) => {
+    
+    let moveElement = (e) => {
+        drag = true; // Preventing click events.
         // Always track and record the mouse's current position.
-        if (event.pageX) {
-            x = event.pageX; // X coordinate based on page.
-            y = event.pageY; // Y coordinate based on page.
+        if (e.pageX) {
+            x = e.pageX; // X coordinate based on page.
+            y = e.pageY; // Y coordinate based on page.
         }
         
         if (target) {
@@ -99,10 +117,11 @@ document.addEventListener('DOMContentLoaded', () => {
             target.lastElementChild.innerText = `X:${target.style.left} Y:${target.style.top}`; 
         }
     };
-
-    let dropElement = () => {
+    
+    let dropElement = (e) => {
         // Remove the attached event from the element so it doesn't keep following mouse.
         target = null;
+        changeDrag(); // Allowing click events after 500 ms.
     };
 
     // Make a specific elements movable.
@@ -111,4 +130,4 @@ document.addEventListener('DOMContentLoaded', () => {
     starElement.addEventListener('mousedown', dragElement);
     wrapper.addEventListener('mousemove', moveElement);
     wrapper.addEventListener('mouseup', dropElement);
-});
+});  
