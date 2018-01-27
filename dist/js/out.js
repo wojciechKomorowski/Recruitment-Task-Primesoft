@@ -70,13 +70,27 @@
 "use strict";
 
 
-var _shape = __webpack_require__(1);
+var _objects = __webpack_require__(7);
 
 // Requires.
 __webpack_require__(2); // A require to compile css file with autoprefixer through webpack.
 
 
 document.addEventListener('DOMContentLoaded', function () {
+
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDTXo9CXrnpPxA37F4xezrtGWeri93SXFA",
+        authDomain: "recruitment-task-primesoft.firebaseapp.com",
+        databaseURL: "https://recruitment-task-primesoft.firebaseio.com",
+        projectId: "recruitment-task-primesoft",
+        storageBucket: "recruitment-task-primesoft.appspot.com",
+        messagingSenderId: "114739030402"
+    };
+    firebase.initializeApp(config);
+    var database = firebase.database();
+    // Databse defined to access coordinates.
+    var ref = database.ref('shapes');
 
     // Distinguishing dragging from click events.
     var drag = false;
@@ -87,9 +101,9 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Objects
-    var squareObject = new _shape.Shape('Square');
-    var circleObject = new _shape.Shape('Circle');
-    var starObject = new _shape.Shape('Star');
+    var squareObject = new _objects.Square('Square');
+    var circleObject = new _objects.Circle('Circle');
+    var starObject = new _objects.Star('Star');
 
     // Elements
     var wrapper = document.querySelector('.wrapper');
@@ -103,6 +117,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // jQuery objects to handle modal.
     var modal = $('#myModal');
+
+    // Initialize shapes position on the screen.
+    var gotData = function gotData(data) {
+        var positions = data.val();
+        // Putting all keys from ref to array.
+        var keysArr = Object.keys(positions);
+
+        // Add positions to proper elements.
+        var addPosition = function addPosition(shapeName, element, index) {
+            if (keysArr[index] === shapeName) {
+                var k = keysArr[index];
+                var _x = positions[k].x; // X coordinate of an element.
+                var _y = positions[k].y; // Y coordinate of an element.
+                element.style.left = _x;
+                element.style.top = _y;
+                element.style.visibility = 'visible';
+            }
+        };
+
+        for (var i = 0; i < keysArr.length; i++) {
+            if (keysArr[i] === 'square') {
+                addPosition('square', squareElement, i);
+            } else if (keysArr[i] === 'circle') {
+                addPosition('circle', circleElement, i);
+            } else if (keysArr[i] === 'star') {
+                addPosition('star', starElement, i);
+            }
+        }
+    };
+
+    var errData = function errData(err) {
+        console.log(err);
+    };
+
+    ref.on('value', gotData, errData);
 
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     var assignNameAndText = function assignNameAndText(object) {
@@ -152,11 +201,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     wrapper.addEventListener('click', addShapeName);
     saveButton.addEventListener('click', addInnerText);
-    for (var i = 0; i < shapeTextArr.length; i++) {
-        shapeTextArr[i].addEventListener('click', function (e) {
+    shapeTextArr.forEach(function (element) {
+        element.addEventListener('mousedown', function (e) {
             e.stopPropagation();
         });
-    }
+    });
 
     // Drag and drop mechanism.
     var target = null;
@@ -176,6 +225,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var moveElement = function moveElement(e) {
         drag = true; // Preventing click events.
+
         // Always track and record the mouse's current position.
         if (e.pageX) {
             x = e.pageX; // X coordinate based on page.
@@ -186,8 +236,28 @@ document.addEventListener('DOMContentLoaded', function () {
             // Set left and top positions.
             target.style.left = x - prev_x + 'px';
             target.style.top = y - prev_y + 'px';
+
+            // Send information about position to database.
+            if (target.className === 'square') {
+                ref.child('square').set({
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            } else if (target.className === 'circle') {
+                ref.child('circle').set({
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            } else if (target.className === 'star') {
+                ref.child('star').set({
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            }
+
             // Print positions in element.
             target.lastElementChild.innerText = 'X:' + target.style.left + ' Y:' + target.style.top;
+            // Send information about coordinates to database.
         }
     };
 
@@ -206,28 +276,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Shape = function Shape(name) {
-    _classCallCheck(this, Shape);
-
-    this.name = name;
-    this.text = '';
-};
-
-exports.Shape = Shape;
-
-/***/ }),
+/* 1 */,
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -267,7 +316,7 @@ exports = module.exports = __webpack_require__(4)(false);
 
 
 // module
-exports.push([module.i, "* {\r\n    margin: 0;\r\n    padding: 0;\r\n    box-sizing: border-box;\r\n}\r\n\r\n.wrapper {\r\n   width: 100%;\r\n   height: 100vh;\r\n}\r\n\r\n.square, .circle, .star {\r\n    width: 150px;\r\n    height: 150px;\r\n    position: absolute;\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-pack: center;\r\n        -ms-flex-pack: center;\r\n            justify-content: center;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n}\r\n\r\n.square {\r\n    background-color: rgba(255, 68, 0, 0.8);\r\n}\r\n\r\n.circle {\r\n    top: 150px;\r\n    background-color: rgba(172, 255, 47, 0.8);\r\n    border-radius: 50%;\r\n}\r\n\r\n.star {\r\n    width: 200px;\r\n    height: 200px;\r\n    top: 300px;\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);\r\n    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);\r\n    background-color: rgba(30, 124, 131, 0.8);\r\n}\r\n\r\n.shape-text {\r\n    -webkit-user-select: none;\r\n       -moz-user-select: none;\r\n        -ms-user-select: none;\r\n            user-select: none;\r\n}\r\n\r\n.position, .position-star {\r\n    position: absolute;\r\n    bottom: 0;\r\n    font-size: 1rem;\r\n    -webkit-user-select: none;\r\n       -moz-user-select: none;\r\n        -ms-user-select: none;\r\n            user-select: none;\r\n}\r\n\r\n.position-star {\r\n    bottom: 50px;\r\n}", ""]);
+exports.push([module.i, "* {\r\n    margin: 0;\r\n    padding: 0;\r\n    box-sizing: border-box;\r\n}\r\n\r\n.wrapper {\r\n   width: 100%;\r\n   height: 100vh;\r\n}\r\n\r\n.square, .circle, .star {\r\n    width: 150px;\r\n    height: 150px;\r\n    position: absolute;\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-box-pack: center;\r\n        -ms-flex-pack: center;\r\n            justify-content: center;\r\n    -webkit-box-align: center;\r\n        -ms-flex-align: center;\r\n            align-items: center;\r\n    visibility: hidden;\r\n}\r\n\r\n.square {\r\n    background-color: rgba(255, 68, 0, 0.8);\r\n}\r\n\r\n.circle {\r\n    top: 150px;\r\n    background-color: rgba(172, 255, 47, 0.8);\r\n    border-radius: 50%;\r\n}\r\n\r\n.star {\r\n    width: 200px;\r\n    height: 200px;\r\n    top: 300px;\r\n    display: -webkit-box;\r\n    display: -ms-flexbox;\r\n    display: flex;\r\n    -webkit-clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);\r\n    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);\r\n    background-color: rgba(30, 124, 131, 0.8);\r\n}\r\n\r\n.shape-text {\r\n    -webkit-user-select: none;\r\n       -moz-user-select: none;\r\n        -ms-user-select: none;\r\n            user-select: none;\r\n}\r\n\r\n.position, .position-star {\r\n    position: absolute;\r\n    bottom: 0;\r\n    font-size: 1rem;\r\n    -webkit-user-select: none;\r\n       -moz-user-select: none;\r\n        -ms-user-select: none;\r\n            user-select: none;\r\n}\r\n\r\n.position-star {\r\n    bottom: 50px;\r\n}", ""]);
 
 // exports
 
@@ -820,6 +869,70 @@ module.exports = function (css) {
 	return fixedCss;
 };
 
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Shape = function Shape(name) {
+    _classCallCheck(this, Shape);
+
+    this.name = name;
+    this.text = '';
+};
+
+var Square = function (_Shape) {
+    _inherits(Square, _Shape);
+
+    function Square(name, text) {
+        _classCallCheck(this, Square);
+
+        return _possibleConstructorReturn(this, (Square.__proto__ || Object.getPrototypeOf(Square)).call(this, name, text));
+    }
+
+    return Square;
+}(Shape);
+
+var Circle = function (_Shape2) {
+    _inherits(Circle, _Shape2);
+
+    function Circle(name, text) {
+        _classCallCheck(this, Circle);
+
+        return _possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, name, text));
+    }
+
+    return Circle;
+}(Shape);
+
+var Star = function (_Shape3) {
+    _inherits(Star, _Shape3);
+
+    function Star(name, text) {
+        _classCallCheck(this, Star);
+
+        return _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, name, text));
+    }
+
+    return Star;
+}(Shape);
+
+exports.Square = Square;
+exports.Circle = Circle;
+exports.Star = Star;
 
 /***/ })
 /******/ ]);
