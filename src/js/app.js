@@ -1,8 +1,22 @@
 // Requires.
 require('../css/app.css'); // A require to compile css file with autoprefixer through webpack.
-import { Shape } from "./shape";
+import { Square, Circle, Star } from "./objects";
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    // Initialize Firebase
+    const config = {
+        apiKey: "AIzaSyDTXo9CXrnpPxA37F4xezrtGWeri93SXFA",
+        authDomain: "recruitment-task-primesoft.firebaseapp.com",
+        databaseURL: "https://recruitment-task-primesoft.firebaseio.com",
+        projectId: "recruitment-task-primesoft",
+        storageBucket: "recruitment-task-primesoft.appspot.com",
+        messagingSenderId: "114739030402"
+    };
+    firebase.initializeApp(config);
+    const database = firebase.database();
+    // Databse defined to access coordinates.
+    const ref = database.ref('shapes'); 
 
     // Distinguishing dragging from click events.
     let drag = false;
@@ -13,9 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Objects
-    let squareObject = new Shape('Square');
-    let circleObject = new Shape('Circle');
-    let starObject = new Shape('Star');
+    let squareObject = new Square('Square');
+    let circleObject = new Circle('Circle');
+    let starObject = new Star('Star');
     
     // Elements
     const wrapper = document.querySelector('.wrapper');
@@ -29,6 +43,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // jQuery objects to handle modal.
     const modal = $('#myModal');
+
+    // Initialize shapes position on the screen.
+    let gotData = (data) => {
+        let positions = data.val();
+        // Putting all keys from ref to array.
+        let keysArr = Object.keys(positions);
+
+        // Add positions to proper elements.
+        let addPosition = (shapeName, element, index) => {
+            if (keysArr[index] === shapeName) {
+                let k = keysArr[index];
+                let x = positions[k].x; // X coordinate of an element.
+                let y = positions[k].y; // Y coordinate of an element.
+                element.style.left = x;
+                element.style.top = y;
+                element.style.visibility = 'visible';
+            }
+        }
+
+        for (let i = 0; i < keysArr.length; i++) {
+            if (keysArr[i] === 'square') {
+                addPosition('square', squareElement, i)
+            } else if (keysArr[i] === 'circle') {
+                addPosition('circle', circleElement, i)
+            } else if (keysArr[i] === 'star') {
+                addPosition('star', starElement, i)
+            }
+        }
+    }
+
+    let errData = (err) => {
+        console.log(err); 
+    }
+
+    ref.on('value', gotData, errData);
 
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     let assignNameAndText = (object) => {
@@ -78,11 +127,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     wrapper.addEventListener('click', addShapeName);
     saveButton.addEventListener('click', addInnerText);
-    for (let i = 0; i < shapeTextArr.length; i++) {
-        shapeTextArr[i].addEventListener('click', (e) => {
+    shapeTextArr.forEach((element) => {
+        element.addEventListener('mousedown', (e) => {
             e.stopPropagation();
         });
-    }
+    });
     
 
     // Drag and drop mechanism.
@@ -103,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let moveElement = (e) => {
         drag = true; // Preventing click events.
+
         // Always track and record the mouse's current position.
         if (e.pageX) {
             x = e.pageX; // X coordinate based on page.
@@ -113,8 +163,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // Set left and top positions.
             target.style.left = (x - prev_x) + 'px';
             target.style.top = (y - prev_y) + 'px';
+
+            // Send information about position to database.
+            if (target.className === 'square') {
+                ref.child('square').set({ 
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            } else if (target.className === 'circle') {
+                ref.child('circle').set({ 
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            } else if (target.className === 'star') {
+                ref.child('star').set({ 
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            }
+
             // Print positions in element.
             target.lastElementChild.innerText = `X:${target.style.left} Y:${target.style.top}`; 
+            // Send information about coordinates to database.
         }
     };
     
