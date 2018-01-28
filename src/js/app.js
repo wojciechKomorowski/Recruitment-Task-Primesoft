@@ -4,7 +4,7 @@ import { Square, Circle, Star } from "./objects";
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // Initialize Firebase
+    // Initialize Firebase.
     const config = {
         apiKey: "AIzaSyDTXo9CXrnpPxA37F4xezrtGWeri93SXFA",
         authDomain: "recruitment-task-primesoft.firebaseapp.com",
@@ -26,12 +26,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 500);
     }
 
-    // Objects
+    // Objects.
     let squareObject = new Square('Square');
     let circleObject = new Circle('Circle');
     let starObject = new Star('Star');
     
-    // Elements
+    // Elements.
     const wrapper = document.querySelector('.wrapper');
     const shapeName = document.querySelector('.shape-name');
     const squareElement = document.querySelector('.square');
@@ -52,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Add positions and text to proper elements.
         let addPosition = (className, element, index, object) => {
+
             if (keysArr[index] === className) {
                 let k = keysArr[index];
                 let x = positions[k].x; // X coordinate of an element.
@@ -61,14 +62,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 element.style.top = y;
                 object.text = text;
                 shapeName.innerText = object.name;
+
                 if (text !== '') {
                     element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
                 }
                 element.style.visibility = 'visible';
             }
-        }
+        };
 
         for (let i = 0; i < keysArr.length; i++) {
+
             if (keysArr[i] === 'square') {
                 addPosition('square', squareElement, i, squareObject);
             } else if (keysArr[i] === 'circle') {
@@ -85,20 +88,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Read data from database.
     ref.on('value', gotData, errData);
 
-    // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     let assignNameAndText = (object) => {
-        // Distinguishing click from dragging events.
-        if (drag === false) {
+        
+        if (drag === false) { // Distinguishing click from dragging events.
             shapeName.innerText = object.name;
             textInput.value = object.text;
             modal.modal('show');
         }
     };
 
-    // Target elements with specify class and do assigning from assingnNameAndText function. 
     let addShapeName = (e) => {
         let target = e.target;
+
         if (target.className === 'square' || target.className === 'circle' || target.className === 'star') {
+
             if (target.className === 'square') {
                 assignNameAndText(squareObject);
             } else if (target.className === 'circle') {
@@ -109,9 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }   
     };
 
-    // Assign text from modal to object.text property and to HTML element.
+    // Assign text from modal.
     let assignModalText = (object, element, text, className) => {
         object.text = text;
+
         if (text !== '') {
             element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
             // Update text property from database.
@@ -131,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Call assignModalText function for speciffic shape names. 
     let addInnerText = () => {
         let modalText = textInput.value;
+        
         if (shapeName.innerText === 'Square') {
             assignModalText(squareObject, squareElement, modalText, 'square');
         } else if (shapeName.innerText === 'Circle') {
