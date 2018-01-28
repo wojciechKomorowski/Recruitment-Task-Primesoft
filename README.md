@@ -1,11 +1,9 @@
 # Recruitment-Task-Primesoft
 
-Simple drag and drop application in JavaScript and Bootstrap 3.
+Simple drag and drop application in JavaScript, Bootstrap 3 and Firebase. 
 
-To do:
-
-* Restore elements positioning after browser refresh.
-* Solve problem with distinguishing click event (modal opening) from mousedown, mousemove and mouseup (drag and drop mechanism).
+Click shape to add some data inside  💾
+Drag shape to change it position ⭐️
 
 ## Getting Started
 
@@ -58,7 +56,7 @@ webpack
 Open new tab in console to run webpack-dev-server:
 
 ```
-./node_modules/.bin/webpack-dev-server --inline --hot
+npm run dev-server
 ```
 
 Now your project is hosted on localhost:3001.
@@ -69,6 +67,7 @@ Now your project is hosted on localhost:3001.
 * CSS
 * JavaScript, ES6
 * Bootstrap 3
+* [Firebase](https://recruitment-task-primesoft.firebaseio.com)
 * Webpack
 
 ## Author
