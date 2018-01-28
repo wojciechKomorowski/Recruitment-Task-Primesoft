@@ -70,7 +70,7 @@
 "use strict";
 
 
-var _objects = __webpack_require__(7);
+var _objects = __webpack_require__(1);
 
 // Requires.
 __webpack_require__(2); // A require to compile css file with autoprefixer through webpack.
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
     firebase.initializeApp(config);
     var database = firebase.database();
-    // Databse defined to access coordinates.
+    // Databse defined to access coordinates and text.
     var ref = database.ref('shapes');
 
     // Distinguishing dragging from click events.
@@ -124,37 +124,44 @@ document.addEventListener('DOMContentLoaded', function () {
         // Putting all keys from ref to array.
         var keysArr = Object.keys(positions);
 
-        // Add positions to proper elements.
-        var addPosition = function addPosition(shapeName, element, index) {
-            if (keysArr[index] === shapeName) {
+        // Add positions and text to proper elements.
+        var addPosition = function addPosition(className, element, index, object) {
+            if (keysArr[index] === className) {
                 var k = keysArr[index];
                 var _x = positions[k].x; // X coordinate of an element.
                 var _y = positions[k].y; // Y coordinate of an element.
+                var text = positions[k].text; // Text of an element.
                 element.style.left = _x;
                 element.style.top = _y;
+                object.text = text;
+                shapeName.innerText = object.name;
+                if (text !== '') {
+                    element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
+                }
                 element.style.visibility = 'visible';
             }
         };
 
         for (var i = 0; i < keysArr.length; i++) {
             if (keysArr[i] === 'square') {
-                addPosition('square', squareElement, i);
+                addPosition('square', squareElement, i, squareObject);
             } else if (keysArr[i] === 'circle') {
-                addPosition('circle', circleElement, i);
+                addPosition('circle', circleElement, i, circleObject);
             } else if (keysArr[i] === 'star') {
-                addPosition('star', starElement, i);
+                addPosition('star', starElement, i, starObject);
             }
         }
     };
 
     var errData = function errData(err) {
-        console.log(err);
+        alert(err);
     };
-
+    // Read data from database.
     ref.on('value', gotData, errData);
 
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     var assignNameAndText = function assignNameAndText(object) {
+        // Distinguishing click from dragging events.
         if (drag === false) {
             shapeName.innerText = object.name;
             textInput.value = object.text;
@@ -177,12 +184,20 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Assign text from modal to object.text property and to HTML element.
-    var assignModalText = function assignModalText(object, element, text) {
+    var assignModalText = function assignModalText(object, element, text, className) {
         object.text = text;
         if (text !== '') {
             element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
+            // Update text property from database.
+            ref.child(className).update({
+                text: object.text
+            });
         } else {
-            element.firstElementChild.innerText = object.text;
+            element.firstElementChild.innerText = '';
+            // Update text property from database.
+            ref.child(className).update({
+                text: object.text
+            });
         }
         modal.modal('hide');
     };
@@ -191,11 +206,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var addInnerText = function addInnerText() {
         var modalText = textInput.value;
         if (shapeName.innerText === 'Square') {
-            assignModalText(squareObject, squareElement, modalText);
+            assignModalText(squareObject, squareElement, modalText, 'square');
         } else if (shapeName.innerText === 'Circle') {
-            assignModalText(circleObject, circleElement, modalText);
+            assignModalText(circleObject, circleElement, modalText, 'circle');
         } else if (shapeName.innerText === 'Star') {
-            assignModalText(starObject, starElement, modalText);
+            assignModalText(starObject, starElement, modalText, 'star');
         }
     };
 
@@ -238,26 +253,23 @@ document.addEventListener('DOMContentLoaded', function () {
             target.style.top = y - prev_y + 'px';
 
             // Send information about position to database.
+            var sendPositions = function sendPositions(className) {
+                ref.child(className).update({
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            };
+
             if (target.className === 'square') {
-                ref.child('square').set({
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('square');
             } else if (target.className === 'circle') {
-                ref.child('circle').set({
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('circle');
             } else if (target.className === 'star') {
-                ref.child('star').set({
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('star');
             }
 
             // Print positions in element.
             target.lastElementChild.innerText = 'X:' + target.style.left + ' Y:' + target.style.top;
-            // Send information about coordinates to database.
         }
     };
 
@@ -276,7 +288,70 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 /***/ }),
-/* 1 */,
+/* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Shape = function Shape(name) {
+    _classCallCheck(this, Shape);
+
+    this.name = name;
+    this.text = '';
+};
+
+var Square = function (_Shape) {
+    _inherits(Square, _Shape);
+
+    function Square(name, text) {
+        _classCallCheck(this, Square);
+
+        return _possibleConstructorReturn(this, (Square.__proto__ || Object.getPrototypeOf(Square)).call(this, name, text));
+    }
+
+    return Square;
+}(Shape);
+
+var Circle = function (_Shape2) {
+    _inherits(Circle, _Shape2);
+
+    function Circle(name, text) {
+        _classCallCheck(this, Circle);
+
+        return _possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, name, text));
+    }
+
+    return Circle;
+}(Shape);
+
+var Star = function (_Shape3) {
+    _inherits(Star, _Shape3);
+
+    function Star(name, text) {
+        _classCallCheck(this, Star);
+
+        return _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, name, text));
+    }
+
+    return Star;
+}(Shape);
+
+exports.Square = Square;
+exports.Circle = Circle;
+exports.Star = Star;
+
+/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -869,70 +944,6 @@ module.exports = function (css) {
 	return fixedCss;
 };
 
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Shape = function Shape(name) {
-    _classCallCheck(this, Shape);
-
-    this.name = name;
-    this.text = '';
-};
-
-var Square = function (_Shape) {
-    _inherits(Square, _Shape);
-
-    function Square(name, text) {
-        _classCallCheck(this, Square);
-
-        return _possibleConstructorReturn(this, (Square.__proto__ || Object.getPrototypeOf(Square)).call(this, name, text));
-    }
-
-    return Square;
-}(Shape);
-
-var Circle = function (_Shape2) {
-    _inherits(Circle, _Shape2);
-
-    function Circle(name, text) {
-        _classCallCheck(this, Circle);
-
-        return _possibleConstructorReturn(this, (Circle.__proto__ || Object.getPrototypeOf(Circle)).call(this, name, text));
-    }
-
-    return Circle;
-}(Shape);
-
-var Star = function (_Shape3) {
-    _inherits(Star, _Shape3);
-
-    function Star(name, text) {
-        _classCallCheck(this, Star);
-
-        return _possibleConstructorReturn(this, (Star.__proto__ || Object.getPrototypeOf(Star)).call(this, name, text));
-    }
-
-    return Star;
-}(Shape);
-
-exports.Square = Square;
-exports.Circle = Circle;
-exports.Star = Star;
 
 /***/ })
 /******/ ]);
