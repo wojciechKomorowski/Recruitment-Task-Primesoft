@@ -78,7 +78,7 @@ __webpack_require__(2); // A require to compile css file with autoprefixer throu
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    // Initialize Firebase
+    // Initialize Firebase.
     var config = {
         apiKey: "AIzaSyDTXo9CXrnpPxA37F4xezrtGWeri93SXFA",
         authDomain: "recruitment-task-primesoft.firebaseapp.com",
@@ -100,12 +100,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 500);
     };
 
-    // Objects
+    // Objects.
     var squareObject = new _objects.Square('Square');
     var circleObject = new _objects.Circle('Circle');
     var starObject = new _objects.Star('Star');
 
-    // Elements
+    // Elements.
     var wrapper = document.querySelector('.wrapper');
     var shapeName = document.querySelector('.shape-name');
     var squareElement = document.querySelector('.square');
@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Add positions and text to proper elements.
         var addPosition = function addPosition(className, element, index, object) {
+
             if (keysArr[index] === className) {
                 var k = keysArr[index];
                 var _x = positions[k].x; // X coordinate of an element.
@@ -135,6 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 element.style.top = _y;
                 object.text = text;
                 shapeName.innerText = object.name;
+
                 if (text !== '') {
                     element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
                 }
@@ -143,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         for (var i = 0; i < keysArr.length; i++) {
+
             if (keysArr[i] === 'square') {
                 addPosition('square', squareElement, i, squareObject);
             } else if (keysArr[i] === 'circle') {
@@ -159,20 +162,21 @@ document.addEventListener('DOMContentLoaded', function () {
     // Read data from database.
     ref.on('value', gotData, errData);
 
-    // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     var assignNameAndText = function assignNameAndText(object) {
-        // Distinguishing click from dragging events.
+
         if (drag === false) {
+            // Distinguishing click from dragging events.
             shapeName.innerText = object.name;
             textInput.value = object.text;
             modal.modal('show');
         }
     };
 
-    // Target elements with specify class and do assigning from assingnNameAndText function. 
     var addShapeName = function addShapeName(e) {
         var target = e.target;
+
         if (target.className === 'square' || target.className === 'circle' || target.className === 'star') {
+
             if (target.className === 'square') {
                 assignNameAndText(squareObject);
             } else if (target.className === 'circle') {
@@ -183,9 +187,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Assign text from modal to object.text property and to HTML element.
+    // Assign text from modal.
     var assignModalText = function assignModalText(object, element, text, className) {
         object.text = text;
+
         if (text !== '') {
             element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
             // Update text property from database.
@@ -205,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Call assignModalText function for speciffic shape names. 
     var addInnerText = function addInnerText() {
         var modalText = textInput.value;
+
         if (shapeName.innerText === 'Square') {
             assignModalText(squareObject, squareElement, modalText, 'square');
         } else if (shapeName.innerText === 'Circle') {
