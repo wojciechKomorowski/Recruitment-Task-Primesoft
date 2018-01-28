@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     firebase.initializeApp(config);
     const database = firebase.database();
-    // Databse defined to access coordinates.
+    // Databse defined to access coordinates and text.
     const ref = database.ref('shapes'); 
 
     // Distinguishing dragging from click events.
@@ -50,37 +50,44 @@ document.addEventListener('DOMContentLoaded', () => {
         // Putting all keys from ref to array.
         let keysArr = Object.keys(positions);
 
-        // Add positions to proper elements.
-        let addPosition = (shapeName, element, index) => {
-            if (keysArr[index] === shapeName) {
+        // Add positions and text to proper elements.
+        let addPosition = (className, element, index, object) => {
+            if (keysArr[index] === className) {
                 let k = keysArr[index];
                 let x = positions[k].x; // X coordinate of an element.
                 let y = positions[k].y; // Y coordinate of an element.
+                let text = positions[k].text; // Text of an element.
                 element.style.left = x;
                 element.style.top = y;
+                object.text = text;
+                shapeName.innerText = object.name;
+                if (text !== '') {
+                    element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
+                }
                 element.style.visibility = 'visible';
             }
         }
 
         for (let i = 0; i < keysArr.length; i++) {
             if (keysArr[i] === 'square') {
-                addPosition('square', squareElement, i)
+                addPosition('square', squareElement, i, squareObject);
             } else if (keysArr[i] === 'circle') {
-                addPosition('circle', circleElement, i)
+                addPosition('circle', circleElement, i, circleObject);
             } else if (keysArr[i] === 'star') {
-                addPosition('star', starElement, i)
+                addPosition('star', starElement, i, starObject);
             }
         }
     }
 
     let errData = (err) => {
-        console.log(err); 
+        alert(err); 
     }
-
+    // Read data from database.
     ref.on('value', gotData, errData);
 
     // Assign object.name to shapeName HTML element and textInput.value to Object.text property.
     let assignNameAndText = (object) => {
+        // Distinguishing click from dragging events.
         if (drag === false) {
             shapeName.innerText = object.name;
             textInput.value = object.text;
@@ -103,12 +110,20 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Assign text from modal to object.text property and to HTML element.
-    let assignModalText = (object, element, text) => {
+    let assignModalText = (object, element, text, className) => {
         object.text = text;
         if (text !== '') {
             element.firstElementChild.innerText = shapeName.innerText + ': ' + object.text;
+            // Update text property from database.
+            ref.child(className).update({ 
+                text: object.text
+            });
         } else {
-            element.firstElementChild.innerText = object.text;
+            element.firstElementChild.innerText = '';
+            // Update text property from database.
+            ref.child(className).update({ 
+                text: object.text
+            });
         }
         modal.modal('hide');
     };
@@ -117,11 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let addInnerText = () => {
         let modalText = textInput.value;
         if (shapeName.innerText === 'Square') {
-            assignModalText(squareObject, squareElement, modalText);
+            assignModalText(squareObject, squareElement, modalText, 'square');
         } else if (shapeName.innerText === 'Circle') {
-            assignModalText(circleObject, circleElement, modalText);
+            assignModalText(circleObject, circleElement, modalText, 'circle');
         } else if (shapeName.innerText === 'Star') {
-            assignModalText(starObject, starElement, modalText);
+            assignModalText(starObject, starElement, modalText, 'star');
         }
     };
 
@@ -165,26 +180,23 @@ document.addEventListener('DOMContentLoaded', () => {
             target.style.top = (y - prev_y) + 'px';
 
             // Send information about position to database.
+            let sendPositions = (className) => {
+                ref.child(className).update({
+                    x: target.style.left,
+                    y: target.style.top
+                });
+            };
+            
             if (target.className === 'square') {
-                ref.child('square').set({ 
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('square');
             } else if (target.className === 'circle') {
-                ref.child('circle').set({ 
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('circle');
             } else if (target.className === 'star') {
-                ref.child('star').set({ 
-                    x: target.style.left,
-                    y: target.style.top
-                });
+                sendPositions('star');
             }
 
             // Print positions in element.
             target.lastElementChild.innerText = `X:${target.style.left} Y:${target.style.top}`; 
-            // Send information about coordinates to database.
         }
     };
     
